@@ -1,0 +1,27 @@
+name = "differential-geometry"
+version = "0.1.0"
+keywords = ["math", "differential-geometry"]
+defaultTargets = ["DifferentialGeometry"]
+testDriver = "DifferentialGeometryTest"
+lintDriver = "batteries/runLinter"
+lintDriverArgs = ["DifferentialGeometry"]
+
+[leanOptions]
+pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+autoImplicit = false
+maxSynthPendingDepth = 3
+weak.linter.mathlibStandardSet = true
+weak.linter.style.header = false # the header linter wants Mathlib's copyright block on every file
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.35.0"
+
+# The root module `DifferentialGeometry.lean` imports every module of the library.
+[[lean_lib]]
+name = "DifferentialGeometry"
+
+[[lean_lib]]
+name = "DifferentialGeometryTest"
+globs = ["DifferentialGeometryTest.+"]
