@@ -1,17 +1,17 @@
 module
 
 public import DifferentialGeometry.Notation
-public import DifferentialGeometry.Surfaces.Patch
-public import DifferentialGeometry.Surfaces.TangentPlane
-public import DifferentialGeometry.Surfaces.Orientation
-public import DifferentialGeometry.Surfaces.AreaElement
-public import DifferentialGeometry.Surfaces.GaussianCurvature
-public import DifferentialGeometry.Surfaces.GeodesicCurvature
-public import DifferentialGeometry.Surfaces.GaussBonnet.Local
-public import DifferentialGeometry.Surfaces.GaussBonnet.Global
+public import DifferentialGeometry.Curves.RegularCurve
+public import DifferentialGeometry.Curves.ClosedCurve
+public import DifferentialGeometry.Curves.PlaneCurve
+public import DifferentialGeometry.Manifolds.TopologicalManifold
+public import DifferentialGeometry.Manifolds.SmoothManifold
+public import DifferentialGeometry.Surfaces.RegularSurface
 
 /-!
 # Differential geometry
 
-The modules of the library, imported in reading order.
+The modules of the library, imported in reading order: regular curves in `ℝⁿ`, closed and simple
+closed curves, convex plane curves, then manifolds, then regular surfaces in `ℝ³`, which are smooth
+`2`-manifolds whose inclusion is smooth and regular.
 -/

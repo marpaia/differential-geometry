@@ -3,25 +3,18 @@ import DifferentialGeometry
 /-!
 # Surfaces
 
-The main statements of `DifferentialGeometry.Surfaces`, used from outside the library the way a
-downstream file would use them: the names are reached by opening the namespace, and the notation
-by opening it as a scope.
+The definition of a surface, used from outside the library the way a downstream file would use
+it: the names are reached by opening the namespace, and the notation by opening it as a scope.
 -/
 
 open DifferentialGeometry
-open scoped DifferentialGeometry Real
+open scoped DifferentialGeometry
 
-/-- Local Gauss–Bonnet, `Σⱼ ∫ κg ds + ∫∫_R K dA + Σⱼ δⱼ = 2π` -/
-example {S : Set ℝ³} {σ : SurfacePatch S} {P : σ.Polygon} (unit_speed : P.IsUnitSpeed) :
-    P.totalGeodesicCurvature + P.totalCurvature + ∑ j, P.exteriorAngle j = 2 * π :=
-  P.gauss_bonnet unit_speed
+/-- A regular surface is a smooth `2`-manifold. -/
+example {S : Set ℝ³} (surface : RegularSurface S) : SmoothManifold 2 S :=
+  surface.toSmoothManifold
 
-/-- Global Gauss–Bonnet, `∫∫_S K dA = 2π χ` -/
-example {S : Set ℝ³} (T : Triangulation S) (smooth : IsSmoothSurface S) (compact : IsCompact S) :
-    T.totalCurvature = 2 * π * T.eulerNumber :=
-  T.gauss_bonnet smooth compact
-
-/-- The patch notation prints back as `σᵤ`, `σᵥ`, and `σᵤᵥ` rather than as `partialU`. -/
-example {S : Set ℝ³} (σ : SurfacePatch S) (q : ℝ²) : σᵤᵥ q = ∂ᵥ σᵤ q := by
-  guard_target =ₛ σᵤᵥ q = σᵤᵥ q
+/-- In a chart `φ` of a surface, the parametrization `x = φ⁻¹` sends parameters in `ℝ²` to points
+of `ℝ³`. -/
+example {S : Set ℝ³} (φ : Chart 2 S) (q : ℝ²) : φ.parametrization q = (φ⁻¹ q : ℝ³) :=
   rfl

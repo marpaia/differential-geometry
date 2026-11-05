@@ -4,7 +4,7 @@ Conventions for every module in the library. The aim is that a statement in Lean
 
 ## Modules
 
-* One module per concept, named for the concept: `Surfaces/TangentPlane.lean`, `Surfaces/GaussBonnet/Local.lean`. Module names are CamelCase words, never numbers or abbreviations, so that imports need no `«…»`.
+* One module per concept, named for the concept: `Manifolds/SmoothManifold.lean`, `Surfaces/RegularSurface.lean`. Module names are CamelCase words, never numbers or abbreviations, so that imports need no `«…»`.
 * Every module is added to the root `DifferentialGeometry.lean`, in reading order.
 * A module begins with `module`, its imports, a module docstring, `@[expose] public section`, any `open scoped`, and `namespace DifferentialGeometry`. It ends with `end DifferentialGeometry`.
 
@@ -26,42 +26,36 @@ Conventions for every module in the library. The aim is that a statement in Lean
     `K = (LN - M²) / (EG - F²)`,
   ```
 
-* Every definition and theorem taken from a book cites it by name and number, in parentheses: `(Pressley, Definition 6.1.1)`, `(do Carmo, Section 4-5)`. A name in the book is set in italics the first time it appears: *geodesic curvature*.
+* Every definition and theorem taken from a book cites it by name and number, in parentheses: `(do Carmo, Section 2-2, Definition 1)`, `(Lee, Smooth Manifolds, p. 12)`. A name in the book is set in italics the first time it appears: *regular surface*.
 * Where the library departs from the book, or chooses a Mathlib notion over the book's, the docstring says so and says why. Where Mathlib lacks something the proof needs, the docstring says that too.
 * Other modules are referred to by their last name component: `GaussianCurvature`, not a path.
 
 ## Declarations
 
-* Every declaration has a docstring. For a named object it begins with the name in bold and then the formula: `/-- **The area element** `dA = ‖σᵤ × σᵥ‖` -/`. For a quantity that is just a letter in the book, the docstring is the formula: `/-- `E = σᵤ · σᵤ` -/`.
-* Every field of a structure has a docstring. A definition with numbered parts in the book numbers its fields the same way: `/-- Part 4: `σ` is one-to-one -/`.
-* A definition is the book's formula where the book gives one, and a Mathlib predicate where the book gives a property. `K` is `(LN - M²) / (EG - F²)`, and smoothness is `ContDiffOn ℝ ∞ σ U`.
-* Each structure has a namespace of the same name, and quantities that belong to it are defined there with a `variable`, so that they are used with dot notation: `σ.normal q`, `P.inside`, `frame.curl q`.
+* Every declaration has a docstring. For a named object it begins with the name in bold, then the citation, then the statement: `/-- **Smoothly compatible charts** (Lee, Smooth Manifolds, p. 12). The transition map from `φ` to `ψ` and the one from `ψ` to `φ` are both smooth. -/`.
+* Every field of a structure has a docstring that states the condition in words: `/-- `U` is open -/`. Where the module docstring enumerates the parts of a definition, the fields do not repeat the numbers; a reader of a field should not need to remember the enumeration.
+* A definition is the book's formula where the book gives one, and a Mathlib predicate where the book gives a property. The transition map is `ψ ∘ φ⁻¹`, and smoothness is `ContDiffOn ℝ ∞`.
+* Each structure has a namespace of the same name, and quantities that belong to it are defined there with a `variable`, so that they are used with dot notation: `φ.U`, `φ.transition ψ`, `surface.A`.
+* When the book's definitions build on one another, the structures do too, each adding exactly the data and conditions its definition adds: `ClosedCurve extends RegularCurve`, `SimpleClosedCurve extends ClosedCurve`, `RegularSurface extends SmoothManifold 2 S`. Data such as a period `T` or a smooth structure `A` makes a structure; a property with no new data, such as convexity, is a predicate in the namespace of the structure it describes, reached by dot notation from every structure that extends it: `α.IsConvex`.
+* Every structure that extends a structure of maps has its own `CoeFun`, so that `α t` works at every level of the chain.
 
 ## Names
 
-* A quantity that is a letter in the book keeps the letter: `E`, `F`, `G`, `L`, `M`, `N`, `K`. Otherwise definitions are camelCase words: `areaElement`, `geodesicCurvature`, `exteriorAngle`.
-* Predicates begin with `Is`: `IsSmoothSurface`, `IsPositivelyOriented`, `IsUnitSpeed`.
-* A theorem with a name in the book takes that name in snake_case: `gauss_bonnet`, `hopf_umlaufsatz`. Any other theorem is named in Mathlib's style, for the shape of its statement: `areaElement_eq_sqrt`, `curl_eq_K_mul_areaElement`, `finrank_tangentPlane`.
-* Hypotheses are named for what they say, as words joined by underscores, never with an `h` prefix: `q_in_U`, `open_O`, `smooth_f`, `unit_speed`, `compact`.
-* Variables follow the book: `σ` for a patch, `q` for a parameter in `U`, `p` for a point of `S`, `c` for a curve in the plane and `γ` for its image on the surface, `P` for a polygon, `T` for a triangulation.
+* A quantity that is a letter in the book keeps the letter, in its plain form: `U`, `A`, never a script letter. Otherwise definitions are camelCase words: `transition`, `smoothStructure`.
+* Predicates begin with `Is`: `IsLocallyEuclidean`, `IsTopologicalManifold`, `IsSmoothAtlas`.
+* A theorem with a name in the book takes that name in snake_case. Any other theorem is named in Mathlib's style, for the shape of its statement: `isMaximalSmoothAtlas_smoothStructure`.
+* Hypotheses are named for what they say, as words joined by underscores, never with an `h` prefix: `p_in_U`, `open_U`, `smooth`, `manifold`.
+* Variables follow the book: `M` for the space, `φ` and `ψ` for charts, `U` for a coordinate domain, `p` for a point of `M`, `q` for a parameter in `ℝ^n`, `A` for an atlas or smooth structure, `S` for a surface, `α` for a curve, `I` for its interval, `t` for a parameter in `I`.
 
 ## Notation
 
-* Notation is declared once, in `Notation.lean`, and is `scoped` to the namespace.
-* A statement uses the notation of the book wherever it exists: `σᵤ`, `⟪a, b⟫`, `√`, `∑ j`, `∫ s in (0)..ℓ`.
+* Notation is declared once and is `scoped` to the namespace: in `Notation.lean`, or beside the definition it refers to when that definition is not available there, as `φ⁻¹` is declared beside `Chart`.
+* A statement uses the notation of the book wherever it exists: `ℝ^n`, `φ⁻¹`, `ψ ∘ φ⁻¹`, `φ '' U` for `φ(U)`.
 
 ## Statements and proofs
 
 * A module may state a theorem whose proof is `sorry`. The statement is the deliverable until the proof is; it is complete, with every hypothesis the proof will need.
-* A proof, when written, follows the argument of the book step by step, with `have` naming each step as the book does:
-
-  ```lean
-  obtain ⟨frame⟩ := σ.nonempty_orthonormalFrame
-  have turning := P.hopf_umlaufsatz unit_speed frame
-  have rotation := frame.rotationAround_eq_totalCurvature P
-  linarith
-  ```
-
+* A proof, when written, follows the argument of the book step by step, with `have` naming each step as the book does, and ends with the one-line tactic that combines them.
 * Helpers used by a single proof are `private`.
 
 ## Formatting

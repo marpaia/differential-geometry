@@ -15,17 +15,33 @@ open scoped DifferentialGeometry
 
 [`DifferentialGeometry.lean`](DifferentialGeometry.lean) imports every module in reading order.
 
+### Curves
+
+A regular curve is a smooth map `α` from an open interval `I ⊆ ℝ` into `ℝⁿ` whose velocity `α'(t)` never vanishes. A closed curve is a regular curve on `ℝ` with a period `T`, a simple closed curve is one-to-one on a period, and a plane curve is convex when its trace lies on one side of each of its tangent lines. The structures extend one another as the definitions do.
+
 | Module | Contents |
 | --- | --- |
-| [`Notation`](DifferentialGeometry/Notation.lean) | `ℝ²`, `ℝ³`, `e₁`, `e₂`, `∂ᵤ`, `∂ᵥ`, `σᵤ`, `σᵥ`, `σᵤᵤ`, `σᵤᵥ`, `σᵥᵥ`, `cross` |
-| [`Surfaces.Patch`](DifferentialGeometry/Surfaces/Patch.lean) | `SurfacePatch`, `IsSmoothSurface` |
-| [`Surfaces.TangentPlane`](DifferentialGeometry/Surfaces/TangentPlane.lean) | `tangentPlane`, its agreement with Mathlib's tangent cone |
-| [`Surfaces.Orientation`](DifferentialGeometry/Surfaces/Orientation.lean) | `normal`, `orientedAngle`, `IsOrientable` |
-| [`Surfaces.AreaElement`](DifferentialGeometry/Surfaces/AreaElement.lean) | `E`, `F`, `G`, `areaElement` |
-| [`Surfaces.GaussianCurvature`](DifferentialGeometry/Surfaces/GaussianCurvature.lean) | `L`, `M`, `N`, `K` |
-| [`Surfaces.GeodesicCurvature`](DifferentialGeometry/Surfaces/GeodesicCurvature.lean) | `geodesicCurvature`, `OrthonormalFrame`, the tangent angle |
-| [`Surfaces.GaussBonnet.Local`](DifferentialGeometry/Surfaces/GaussBonnet/Local.lean) | `CurvilinearPolygon`, Green's theorem, Hopf's Umlaufsatz, local Gauss–Bonnet |
-| [`Surfaces.GaussBonnet.Global`](DifferentialGeometry/Surfaces/GaussBonnet/Global.lean) | `Triangulation`, the Euler number, global Gauss–Bonnet |
+| [`Curves.RegularCurve`](DifferentialGeometry/Curves/RegularCurve.lean) | `RegularCurve`, a smooth map `α : I → ℝⁿ` from an open interval with `α'(t) ≠ 0` |
+| [`Curves.ClosedCurve`](DifferentialGeometry/Curves/ClosedCurve.lean) | `ClosedCurve`, a regular curve on `ℝ` with period `T`; `SimpleClosedCurve`, one-to-one on `[0, T)` |
+| [`Curves.PlaneCurve`](DifferentialGeometry/Curves/PlaneCurve.lean) | `J`, the quarter turn of `ℝ²`; `IsConvex`, the trace lies on one side of every tangent line |
+
+### Manifolds
+
+A smooth `n`-manifold is a pair `(M, A)`. The modules follow the five parts of the definition: a topological space, local coordinates, the Hausdorff and second countable conditions, a smooth atlas, and maximality.
+
+| Module | Contents |
+| --- | --- |
+| [`Manifolds.TopologicalManifold`](DifferentialGeometry/Manifolds/TopologicalManifold.lean) | `Chart`, `IsLocallyEuclidean`, `IsTopologicalManifold` |
+| [`Manifolds.SmoothManifold`](DifferentialGeometry/Manifolds/SmoothManifold.lean) | `transition`, `SmoothlyCompatible`, `IsAtlas`, `IsSmoothAtlas`, `IsMaximalSmoothAtlas`, `SmoothManifold` |
+
+### Surfaces
+
+A regular surface is a smooth `2`-manifold `S ⊆ ℝ³`, with the subspace topology, whose inclusion into `ℝ³` is smooth with a one-to-one derivative in every smooth chart. do Carmo's parametrization `x` is the inclusion read in a chart, `φ⁻¹`.
+
+| Module | Contents |
+| --- | --- |
+| [`Notation`](DifferentialGeometry/Notation.lean) | `ℝ^n`, `ℝ²`, `ℝ³` |
+| [`Surfaces.RegularSurface`](DifferentialGeometry/Surfaces/RegularSurface.lean) | `RegularSurface`, a smooth `2`-manifold `S ⊆ ℝ³` whose inclusion is smooth and regular in every smooth chart |
 
 `DifferentialGeometryTest/` holds files that use the library from outside, as a downstream project would. `lake test` builds them.
 
@@ -33,17 +49,17 @@ open scoped DifferentialGeometry
 
 | On paper | In Lean | Mathlib |
 | --- | --- | --- |
-| `ℝ²`, `ℝ³` | `ℝ²`, `ℝ³` | `EuclideanSpace ℝ (Fin 2)`, `EuclideanSpace ℝ (Fin 3)` |
-| `∂f/∂u`, `∂f/∂v` | `∂ᵤ f`, `∂ᵥ f` | `lineDeriv ℝ f q e₁`, `lineDeriv ℝ f q e₂` |
-| `σᵤ`, `σᵥ`, `σᵤᵤ`, `σᵤᵥ`, `σᵥᵥ` | the same | derivatives of the patch `σ` in scope |
-| `a × b` | `cross a b` | `crossProduct` on coordinates |
-| `a · b` | `⟪a, b⟫` | `inner ℝ a b`, with `open scoped RealInnerProductSpace` |
-| `E`, `F`, `G`, `L`, `M`, `N`, `K` | `σ.E q`, …, `σ.K q` | |
-| `∫∫_R f du dv` | `∫ x in R, f x` | the Lebesgue integral over `R ⊆ ℝ²` |
+| `ℝⁿ`, `ℝ²`, `ℝ³` | `ℝ^n`, `ℝ²`, `ℝ³` | `EuclideanSpace ℝ (Fin n)` |
+| `(U, φ)`, `φ⁻¹`, `ψ ∘ φ⁻¹` | `φ : Chart n M`, `φ⁻¹`, `φ.transition ψ` | |
+| `A`, a smooth structure | `A : Set (Chart n M)` | |
+| `α(t)`, `α'(t)`, a curve and its velocity | `α : RegularCurve n`, `α t`, `deriv α t` | |
+| `T`, the period of a closed curve | `α : ClosedCurve n`, `α.T` | |
+| `Jv`, `v` rotated a quarter turn; `⟪v, w⟫` | `J v`, `⟪v, w⟫` | `inner ℝ v w`, with `open scoped RealInnerProductSpace` |
+| `x = φ⁻¹`, the parametrization of a surface in the chart `φ` | `φ.parametrization` | |
 
 ## Status
 
-Each module states its definitions and theorems in full. A theorem whose proof is `sorry` is stated but not yet proved, and `lake build` reports every one of them as a `declaration uses 'sorry'` warning. When the library is free of them, CI builds with `--wfail`.
+The library is definitions, in the notation of the books, with the theorems to come. The one theorem present, that a smooth atlas determines a smooth structure, is stated with a `sorry` proof because `SmoothManifold.ofAtlas` needs it; `lake build` reports it as a `declaration uses 'sorry'` warning. When the library is free of them, CI builds with `--wfail`.
 
 ## Building
 
