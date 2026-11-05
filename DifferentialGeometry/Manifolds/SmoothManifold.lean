@@ -77,13 +77,19 @@ def IsAtlas (A : Set (Chart n M)) : Prop :=
 
 /-- **Smooth atlases** (Lee, Smooth Manifolds, p. 12). An atlas any two of whose charts are
 smoothly compatible. -/
-def IsSmoothAtlas (A : Set (Chart n M)) : Prop :=
-  IsAtlas A ∧ ∀ φ ∈ A, ∀ ψ ∈ A, φ.SmoothlyCompatible ψ
+structure IsSmoothAtlas (A : Set (Chart n M)) : Prop where
+  /-- the domains of the charts of `A` cover `M` -/
+  atlas : IsAtlas A
+  /-- any two charts of `A` are smoothly compatible -/
+  compatible : ∀ φ ∈ A, ∀ ψ ∈ A, φ.SmoothlyCompatible ψ
 
 /-- **Maximal smooth atlases** (Lee, Smooth Manifolds, p. 13). A smooth atlas that contains every
 chart smoothly compatible with all of its charts. -/
-def IsMaximalSmoothAtlas (A : Set (Chart n M)) : Prop :=
-  IsSmoothAtlas A ∧ ∀ φ : Chart n M, (∀ ψ ∈ A, φ.SmoothlyCompatible ψ) → φ ∈ A
+structure IsMaximalSmoothAtlas (A : Set (Chart n M)) : Prop where
+  /-- `A` is a smooth atlas -/
+  smooth : IsSmoothAtlas A
+  /-- a chart smoothly compatible with every chart of `A` is in `A` -/
+  maximal : ∀ φ : Chart n M, (∀ ψ ∈ A, φ.SmoothlyCompatible ψ) → φ ∈ A
 
 /-- **Smooth manifolds** (Lee, Smooth Manifolds, p. 13). A pair `(M, A)` of a topological manifold
 and a smooth structure, a maximal smooth atlas. The charts of `A` are the smooth charts. -/
@@ -115,5 +121,27 @@ def SmoothManifold.ofAtlas (manifold : IsTopologicalManifold n M) {A₀ : Set (C
   topologicalManifold := manifold
   A := smoothStructure A₀
   maximal := isMaximalSmoothAtlas_smoothStructure smooth
+
+/-- **The charts of a smooth atlas are smooth charts of the manifold it determines** (Lee, Smooth
+Manifolds, Proposition 1.17 (a)). A chart of `A₀` is smoothly compatible with every chart of `A₀`,
+because `A₀` is a smooth atlas, and that is what membership in the smooth structure asks. -/
+theorem SmoothManifold.subset_ofAtlas (manifold : IsTopologicalManifold n M)
+    {A₀ : Set (Chart n M)} (smooth : IsSmoothAtlas A₀) :
+    A₀ ⊆ (SmoothManifold.ofAtlas manifold smooth).A :=
+  fun φ φ_in_A₀ ψ ψ_in_A₀ => smooth.compatible φ φ_in_A₀ ψ ψ_in_A₀
+
+/-- **A smooth structure is determined by itself** (Lee, Smooth Manifolds, p. 13). The charts
+smoothly compatible with every chart of `A` are exactly the charts of `A`. Maximality puts every
+such chart in `A`, and `A` is a smooth atlas, so each of its charts is compatible with all of
+them. -/
+theorem SmoothManifold.smoothStructure_A (manifold : SmoothManifold n M) :
+    smoothStructure manifold.A = manifold.A := by
+  ext φ
+  rw [smoothStructure, Set.mem_ofPred_eq]
+  constructor
+  · intro compatible
+    exact manifold.maximal.maximal φ compatible
+  · intro φ_in_A ψ ψ_in_A
+    exact manifold.maximal.smooth.compatible φ φ_in_A ψ ψ_in_A
 
 end DifferentialGeometry

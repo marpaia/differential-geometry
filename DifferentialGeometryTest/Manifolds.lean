@@ -20,12 +20,13 @@ def euclideanChart (n : ℕ) : Chart n (ℝ^n) where
   continuous := continuousOn_id
   continuous_inverse := continuousOn_id
 
-/-- `ℝ^n` is a topological `n`-manifold, and `ℝ^2` is `ℝ²`. -/
+/-- `ℝ^n` is a topological `n`-manifold. -/
 example (n : ℕ) : IsTopologicalManifold n (ℝ^n) where
   hausdorff := inferInstance
   secondCountable := inferInstance
   locallyEuclidean p := ⟨euclideanChart n, Set.mem_univ p⟩
 
+/-- `ℝ^2` is `ℝ²`. -/
 example : Chart 2 ℝ² = Chart 2 (ℝ^2) := rfl
 
 /-- The inverse of a chart named `φ` is written `φ⁻¹`, in statements and in goals. -/
