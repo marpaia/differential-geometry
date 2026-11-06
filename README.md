@@ -1,6 +1,6 @@
 # Differential Geometry
 
-Differential geometry in Lean 4, written to be read.
+Differential geometry in Lean 4, written to be readable.
 
 This is a library for learning differential geometry with Lean. The definitions follow do Carmo, Pressley, and Lee closely, with the same letters, the same order of ideas, and a citation to the page, so you can read the book and the Lean side by side. It is built on [Mathlib](https://github.com/leanprover-community/mathlib4), which already has a great deal of differential geometry. The aim here is not to add to that, but to write the subject down in a way that is a pleasure to read.
 
@@ -21,9 +21,9 @@ structure IsTopologicalManifold (n : ℕ) (M : Type*) [TopologicalSpace M] : Pro
   secondCountable : SecondCountableTopology M
 ```
 
-Each condition is one field, stated in words in its docstring and as a Mathlib predicate in its type.
+A topological manifold has coordinates but no calculus. A chart `φ` lets you read a function on `M` as a function on `ℝⁿ` and differentiate it there, but two charts can disagree about whether the result is smooth. So Lee asks for charts that agree. Two charts `φ` and `ψ` are smoothly compatible when the transition map `ψ ∘ φ⁻¹` between their coordinates is smooth. An atlas is smooth when any two of its charts are compatible, and a smooth atlas is maximal when it already contains every chart compatible with it. Lee calls a maximal smooth atlas a smooth structure, and a smooth manifold is a topological manifold together with one.
 
-A topological manifold has coordinates but no calculus. A chart `φ` lets a function on `M` be read as a function on `ℝⁿ`, where it can be differentiated, but two charts can disagree about whether the result is smooth. Two charts `φ` and `ψ` are smoothly compatible when the transition map `ψ ∘ φ⁻¹` between their coordinates is smooth, an atlas is smooth when its charts are pairwise compatible, and a smooth atlas is maximal when it already contains every chart compatible with it. Lee calls a maximal smooth atlas a smooth structure, and a smooth manifold is a topological manifold together with one. The definition says exactly that, with the topological manifold as its first field.
+That is the definition, with the topological manifold as its first field:
 
 ```lean
 /-- **Smooth manifolds** (Lee, Smooth Manifolds, p. 13). A pair `(M, A)` of a topological manifold
@@ -37,9 +37,9 @@ structure SmoothManifold (n : ℕ) (M : Type*) [TopologicalSpace M] where
   maximal : IsMaximalSmoothAtlas A
 ```
 
-A regular surface builds on this in turn, as the next definition in the book builds on the last.
+A regular surface builds on `SmoothManifold` the same way.
 
-To see how this definition of a smooth manifold is used, take the first consequence of maximality: a smooth structure is determined by itself. Write `smoothStructure A` for the set of all charts smoothly compatible with every chart of `A`, the construction Lee uses in Proposition 1.17 to grow a few charts into a smooth structure. Applied to a smooth structure, it gives back the same set, and the proof touches every field of `SmoothManifold` but the first.
+To see how this definition gets used, here is a small theorem about it. `smoothStructure A` is the set of all charts that are smoothly compatible with every chart of `A`. Lee uses this in Proposition 1.17 to build a smooth structure out of a handful of charts. If `A` is already a smooth structure, you get `A` back.
 
 ```lean
 /-- **A smooth structure is determined by itself** (Lee, Smooth Manifolds, p. 13). The charts
@@ -61,22 +61,20 @@ Two sets are equal when they have the same members, so `ext φ` picks a chart an
 
 ## Contents
 
-The library has three areas, each in its own directory under [`DifferentialGeometry/`](DifferentialGeometry/), and the root module [`DifferentialGeometry.lean`](DifferentialGeometry.lean) imports them in reading order. Every module opens with an account of its mathematics at the level of the book, so the modules can be read in order as a short text.
+The library has three areas, each in its own directory under [`DifferentialGeometry/`](DifferentialGeometry/), and the root module [`DifferentialGeometry.lean`](DifferentialGeometry.lean) imports them in reading order. Each module starts with a docstring that explains the mathematics at the level of the book, so you can read the modules in order like a short set of notes.
 
 **Curves** follow do Carmo's first chapter and Pressley's first three. A [regular curve](DifferentialGeometry/Curves/RegularCurve.lean) is a smooth map from an open interval into `ℝⁿ` whose velocity never vanishes. A [closed curve](DifferentialGeometry/Curves/ClosedCurve.lean) is a regular curve on `ℝ` with a period, and a simple closed curve is one-to-one on a period. A [plane curve](DifferentialGeometry/Curves/PlaneCurve.lean) is convex when its trace lies on one side of each of its tangent lines. The structures extend one another as the definitions do.
 
 **Manifolds** follow Lee. A [topological manifold](DifferentialGeometry/Manifolds/TopologicalManifold.lean) is a second countable Hausdorff space in which every point lies in a coordinate chart `(U, φ)`. A [smooth manifold](DifferentialGeometry/Manifolds/SmoothManifold.lean) is a topological manifold with a maximal atlas `A` of smoothly compatible charts.
 
-**Surfaces** follow do Carmo's second chapter, seen from Lee's side. A [regular surface](DifferentialGeometry/Surfaces/RegularSurface.lean) is a smooth `2`-manifold `S ⊆ ℝ³` whose inclusion into `ℝ³` is smooth with a one-to-one derivative. do Carmo's parametrization `x` is that inclusion read in a chart, `φ⁻¹`.
-
-The library is definitions. The theorems come next, and the one already stated, that a smooth atlas determines a smooth structure, carries a `sorry` until its proof is written.
+**Surfaces** follow do Carmo's second chapter, but are defined the way Lee would define them. A [regular surface](DifferentialGeometry/Surfaces/RegularSurface.lean) is a smooth `2`-manifold `S ⊆ ℝ³` whose inclusion into `ℝ³` is smooth with a one-to-one derivative. do Carmo's parametrization `x` is that inclusion read in a chart, `φ⁻¹`.
 
 ## The books
 
-- Manfredo P. do Carmo, *Differential Geometry of Curves and Surfaces*, revised edition. The source for curves and surfaces, and for the terminology of both.
-- Andrew Pressley, *Elementary Differential Geometry*, second edition. Cited beside do Carmo where the two definitions differ in form, and the source for the periodic form of a closed curve.
-- John M. Lee, *Introduction to Topological Manifolds*, second edition. The source for charts and topological manifolds.
-- John M. Lee, *Introduction to Smooth Manifolds*, second edition. The source for atlases, smooth structures, and the view of a surface as a `2`-manifold in `ℝ³`.
+- Manfredo P. do Carmo, *Differential Geometry of Curves and Surfaces*, revised edition. Curves and surfaces, and the terminology for both.
+- Andrew Pressley, *Elementary Differential Geometry*, second edition. Cited alongside do Carmo where the two state a definition differently, and the source of the periodic form of a closed curve.
+- John M. Lee, *Introduction to Topological Manifolds*, second edition. Charts and topological manifolds.
+- John M. Lee, *Introduction to Smooth Manifolds*, second edition. Atlases, smooth structures, and the view of a surface as a `2`-manifold sitting in `ℝ³`.
 
 Citations give the book, then the section or page and the definition or proposition number, as in `(do Carmo, Section 2-2, Definition 1)` or `(Lee, Smooth Manifolds, p. 12)`.
 
@@ -96,7 +94,7 @@ Everything is in the namespace `DifferentialGeometry`, and the notation is scope
 | `A`, a smooth structure | `A : Set (Chart n M)` |
 | `x = φ⁻¹`, a parametrization of a surface | `φ.parametrization` |
 
-Under the notation, `ℝ^n` is Mathlib's `EuclideanSpace ℝ (Fin n)` and `⟪v, w⟫` is `inner ℝ v w`. The conventions behind the names, docstrings, and proofs are in [STYLE.md](STYLE.md).
+Behind the notation, `ℝ^n` is Mathlib's `EuclideanSpace ℝ (Fin n)` and `⟪v, w⟫` is `inner ℝ v w`. The conventions for names, docstrings, and proofs are in [STYLE.md](STYLE.md).
 
 ## Using it
 
