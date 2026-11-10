@@ -5,13 +5,13 @@ public import Mathlib.Analysis.InnerProductSpace.PiL2 /- EuclideanSpace -/
 /-!
 # Notation
 
-The notation used throughout the library, so that statements read as they do on paper. It is
+General notation used throughout the library, so that statements read as they do on paper. It is
 scoped to the `DifferentialGeometry` namespace: `open scoped DifferentialGeometry` turns it on.
 
 * `ℝ^n`, the model space of an `n`-manifold
 * `ℝ²` and `ℝ³`, the parameters of a surface and the space containing it
 
-The inverses `φ⁻¹` and `ψ⁻¹` of charts are declared beside `Chart`, in `TopologicalManifold`.
+The inverses `φ⁻¹` and `ψ⁻¹` of charts are declared in `Manifolds/Notation`.
 -/
 
 @[expose] public section

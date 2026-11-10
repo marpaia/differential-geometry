@@ -35,9 +35,9 @@ Conventions for every module in the library. The aim is that a statement in Lean
 * Every declaration has a docstring. For a named object it begins with the name in bold, then the citation, then the statement: `/-- **Smoothly compatible charts** (Lee, Smooth Manifolds, p. 12). The transition map from `φ` to `ψ` and the one from `ψ` to `φ` are both smooth. -/`.
 * Every field of a structure has a docstring that states the condition in words: `/-- `U` is open -/`. Where the module docstring enumerates the parts of a definition, the fields do not repeat the numbers; a reader of a field should not need to remember the enumeration.
 * A definition is the book's formula where the book gives one, and a Mathlib predicate where the book gives a property. The transition map is `ψ ∘ φ⁻¹`, and smoothness is `ContDiffOn ℝ ∞`.
-* A property made of several conditions is a `structure ... : Prop` with one named field per condition, never a conjunction: `IsTopologicalManifold`, `IsSmoothAtlas`, `IsMaximalSmoothAtlas`. A proof then reaches each condition by name, `manifold.maximal.smooth.atlas`, instead of by `.1` and `.2`.
+* A property made of several conditions is a `structure ... : Prop` with one named field per condition, never a conjunction: `IsTopologicalManifold`, `IsSmoothAtlas`, `IsMaximalSmoothAtlas`. A proof then reaches each condition by name, `manifold.smoothStructure.covers`, instead of by `.1` and `.2`.
 * Each structure has a namespace of the same name, and quantities that belong to it are defined there with a `variable`, so that they are used with dot notation: `φ.U`, `φ.transition ψ`, `surface.A`.
-* When the book's definitions build on one another, the structures do too, each adding exactly the data and conditions its definition adds: `ClosedCurve extends RegularCurve`, `SimpleClosedCurve extends ClosedCurve`, `RegularSurface extends SmoothManifold 2 S`. Data such as a period `T` or a smooth structure `A` makes a structure; a property with no new data, such as convexity, is a predicate in the namespace of the structure it describes, reached by dot notation from every structure that extends it: `α.IsConvex`.
+* When the book's definitions build on one another, the structures do too, each adding exactly the data and conditions its definition adds: `ClosedCurve extends RegularCurve`, `SimpleClosedCurve extends ClosedCurve`, `IsMaximalSmoothAtlas extends IsSmoothAtlas`, `RegularSurface extends SmoothManifold 2 S`. Data such as a period `T` or a smooth structure `A` makes a structure; a property with no new data, such as convexity, is a predicate in the namespace of the structure it describes, reached by dot notation from every structure that extends it: `α.IsConvex`.
 * Every structure that extends a structure of maps has its own `CoeFun`, so that `α t` works at every level of the chain.
 
 ## Names
@@ -50,7 +50,7 @@ Conventions for every module in the library. The aim is that a statement in Lean
 
 ## Notation
 
-* Notation is declared once and is `scoped` to the namespace: in `Notation.lean`, or beside the definition it refers to when that definition is not available there, as `φ⁻¹` is declared beside `Chart`.
+* Notation is declared once and is `scoped` to the `DifferentialGeometry` namespace. General notation belongs in `Notation.lean`; notation for an area belongs in its own module, such as `Manifolds/Notation.lean`, which imports the definitions it needs. Keep any associated pretty-printer with the notation.
 * A statement uses the notation of the book wherever it exists: `ℝ^n`, `φ⁻¹`, `ψ ∘ φ⁻¹`, `φ '' U` for `φ(U)`.
 
 ## Statements and proofs

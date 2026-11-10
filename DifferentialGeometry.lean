@@ -5,6 +5,7 @@ public import DifferentialGeometry.Curves.RegularCurve
 public import DifferentialGeometry.Curves.ClosedCurve
 public import DifferentialGeometry.Curves.PlaneCurve
 public import DifferentialGeometry.Manifolds.TopologicalManifold
+public import DifferentialGeometry.Manifolds.Notation
 public import DifferentialGeometry.Manifolds.SmoothManifold
 public import DifferentialGeometry.Surfaces.RegularSurface
 

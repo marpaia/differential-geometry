@@ -1,45 +1,19 @@
 module
 
-public import DifferentialGeometry.Manifolds.TopologicalManifold /- Chart, IsTopologicalManifold -/
-public import Mathlib.Analysis.Calculus.ContDiff.Defs /- ContDiffOn, ∞ -/
+public import DifferentialGeometry.Manifolds.Notation /- Chart, IsTopologicalManifold, φ⁻¹ -/
+public import Mathlib.Analysis.Calculus.ContDiff.Comp /- ContDiffOn.comp -/
 
 /-!
 # Smooth manifolds
 
-Wherever two charts overlap, a point has two coordinate descriptions. Calculus on `M` needs to
-pass between them without changing whether a function is smooth. The smooth branch of the
-definition has two parts (Lee, Smooth Manifolds, Chapter 1).
+A smooth `n`-manifold is a topological `n`-manifold equipped with a maximal atlas whose transition
+maps are smooth (Lee, Smooth Manifolds, p. 13).
 
-4. A smooth atlas: a covering family of charts whose changes of coordinates are smooth.
-5. Maximality: every chart compatible with that family is included.
+An atlas is a collection of charts covering the space. It is smooth when coordinate changes are
+`C^∞` in both directions. It is maximal when every chart smoothly compatible with it is included.
+A maximal smooth atlas is a smooth structure.
 
-For charts `(U, φ)` and `(W, ψ)`, the *transition map* from `φ`-coordinates to `ψ`-coordinates is
-
-  `T_{ψφ} = ψ ∘ φ⁻¹ : φ(U ∩ W) → ψ(U ∩ W)`,
-
-read from right to left: start with `x = φ(p)`, recover `p` by `φ⁻¹`, then apply `ψ`. No point of
-`M` moves. The overlap is open in `M`, and both charts send it to open subsets of `ℝ^n`, so the
-transition map is a map between Euclidean open sets, and ordinary partial derivatives apply. It is
-*smooth* if its components have continuous partial derivatives of every order, Mathlib's
-`ContDiffOn ℝ ∞`.
-
-Two charts are *smoothly compatible* if the transition map and its inverse are both smooth (p. 12).
-Both directions are needed. On the line, `φ(p) = p` and `ψ(p) = p³` have the smooth transition
-`u ↦ u³`, but the inverse `v ↦ ∛v` has no derivative at `0`, and the two charts would disagree
-about whether `f(p) = p` is smooth. Charts with no overlap are compatible without a test, because
-every map is smooth on the empty set.
-
-An *atlas* is a collection of charts whose domains cover `M`, and a *smooth atlas* is one any two
-of whose charts are smoothly compatible (p. 12). A smooth atlas is *maximal* if it contains every
-chart smoothly compatible with all of its charts; Lee also says *complete*. A *smooth structure*
-on `M` is a maximal smooth atlas, its charts are the *smooth charts*, and a *smooth manifold* is a
-pair `(M, A)` of a topological manifold and a smooth structure on it (p. 13).
-
-A maximal atlas contains very many charts, so a smooth structure is specified by any smooth atlas
-`A₀` that covers `M`: the charts compatible with every chart of `A₀` form the unique maximal
-smooth atlas containing `A₀` (Proposition 1.17). The choice of `A₀` still matters. On the line,
-the identity chart and the cubic chart each generate a smooth structure, but their
-incompatibility keeps them out of the same one.
+Every smooth atlas determines a unique maximal smooth atlas (Proposition 1.17).
 -/
 
 @[expose] public section
@@ -52,17 +26,17 @@ namespace Chart
 
 variable {n : ℕ} {M : Type*} [TopologicalSpace M] (φ ψ : Chart n M)
 
-/-- **The overlap** `φ(U ∩ W)` of the charts `(U, φ)` and `(W, ψ)`, in `φ`-coordinates -/
+/-- **The overlap in coordinates**, `φ(U ∩ W)`, for charts `(U, φ)` and `(W, ψ)`. -/
 def overlap : Set (ℝ^n) :=
   φ '' (φ.U ∩ ψ.U)
 
-/-- **The transition map** `T_{ψφ} = ψ ∘ φ⁻¹` from `φ`-coordinates to `ψ`-coordinates (Lee, Smooth
-Manifolds, p. 12) -/
+/-- **Transition maps** (Lee, Smooth Manifolds, p. 12). The change `ψ ∘ φ⁻¹` from `φ`-coordinates
+to `ψ`-coordinates, used on their overlap. -/
 def transition : ℝ^n → ℝ^n :=
   ψ ∘ φ⁻¹
 
-/-- **Smoothly compatible charts** (Lee, Smooth Manifolds, p. 12). The transition map from `φ` to
-`ψ` and the one from `ψ` to `φ` are both smooth. -/
+/-- **Smooth compatibility** (Lee, Smooth Manifolds, p. 12). Coordinate changes are smooth in
+both directions on the overlap. -/
 def SmoothlyCompatible : Prop :=
   ContDiffOn ℝ ∞ (φ.transition ψ) (φ.overlap ψ) ∧ ContDiffOn ℝ ∞ (ψ.transition φ) (ψ.overlap φ)
 
@@ -75,73 +49,121 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
 def IsAtlas (A : Set (Chart n M)) : Prop :=
   ∀ p : M, ∃ φ ∈ A, p ∈ φ.U
 
-/-- **Smooth atlases** (Lee, Smooth Manifolds, p. 12). An atlas any two of whose charts are
-smoothly compatible. -/
+/-- **Smooth atlases** (Lee, Smooth Manifolds, p. 12). A covering collection of pairwise
+smoothly compatible charts. -/
 structure IsSmoothAtlas (A : Set (Chart n M)) : Prop where
   /-- the domains of the charts of `A` cover `M` -/
-  atlas : IsAtlas A
+  covers : IsAtlas A
   /-- any two charts of `A` are smoothly compatible -/
   compatible : ∀ φ ∈ A, ∀ ψ ∈ A, φ.SmoothlyCompatible ψ
 
 /-- **Maximal smooth atlases** (Lee, Smooth Manifolds, p. 13). A smooth atlas that contains every
 chart smoothly compatible with all of its charts. -/
-structure IsMaximalSmoothAtlas (A : Set (Chart n M)) : Prop where
-  /-- `A` is a smooth atlas -/
-  smooth : IsSmoothAtlas A
+structure IsMaximalSmoothAtlas (A : Set (Chart n M)) : Prop extends IsSmoothAtlas A where
   /-- a chart smoothly compatible with every chart of `A` is in `A` -/
   maximal : ∀ φ : Chart n M, (∀ ψ ∈ A, φ.SmoothlyCompatible ψ) → φ ∈ A
 
-/-- **Smooth manifolds** (Lee, Smooth Manifolds, p. 13). A pair `(M, A)` of a topological manifold
-and a smooth structure, a maximal smooth atlas. The charts of `A` are the smooth charts. -/
+/-- **Smooth manifolds** (Lee, Smooth Manifolds, p. 13). A topological `n`-manifold equipped with
+a maximal atlas whose transition maps are smooth. -/
 structure SmoothManifold (n : ℕ) (M : Type*) [TopologicalSpace M] where
   /-- `M` is a topological `n`-manifold -/
-  topologicalManifold : IsTopologicalManifold n M
+  topological : IsTopologicalManifold n M
   /-- `A`, the smooth structure -/
   A : Set (Chart n M)
   /-- `A` is a maximal smooth atlas -/
-  maximal : IsMaximalSmoothAtlas A
+  smoothStructure : IsMaximalSmoothAtlas A
 
-/-- **The smooth structure determined by an atlas** `A₀` (Lee, Smooth Manifolds,
-Proposition 1.17). The charts smoothly compatible with every chart of `A₀`. -/
+/-- **The smooth structure generated by an atlas** (Lee, Smooth Manifolds, Proposition 1.17).
+The charts smoothly compatible with every chart of `A₀`. -/
 def smoothStructure (A₀ : Set (Chart n M)) : Set (Chart n M) :=
   {φ | ∀ ψ ∈ A₀, φ.SmoothlyCompatible ψ}
 
-/-- **Every smooth atlas determines a smooth structure** (Lee, Smooth Manifolds,
-Proposition 1.17 (a)). Two charts compatible with `A₀` are compatible with each other: near any
-point of their overlap, `η ∘ ψ⁻¹ = (η ∘ φ⁻¹) ∘ (φ ∘ ψ⁻¹)` for a chart `φ` of `A₀` around that point,
-and both factors are smooth. Any chart compatible with the result was already included. -/
-theorem isMaximalSmoothAtlas_smoothStructure {A₀ : Set (Chart n M)} (smooth : IsSmoothAtlas A₀) :
-    IsMaximalSmoothAtlas (smoothStructure A₀) :=
-  sorry
+/-- An overlap coordinate represents a point in both chart domains. -/
+private theorem inverse_mem_overlap (φ ψ : Chart n M) {q : ℝ^n}
+    (q_in_overlap : q ∈ φ.overlap ψ) : φ.inv q ∈ φ.U ∩ ψ.U := by
+  obtain ⟨p, p_in_domains, rfl⟩ := q_in_overlap
+  rwa [φ.inv_apply p p_in_domains.1]
 
-/-- **A smooth manifold from a covering smooth atlas** (Lee, Smooth Manifolds, Proposition 1.17).
-The usual way to specify one: a few charts, and the structure they determine. -/
+/-- The overlap of two chart domains is open in coordinates. -/
+private theorem isOpen_overlap (φ ψ : Chart n M) : IsOpen (φ.overlap ψ) := by
+  have overlap_eq : φ.overlap ψ = (φ '' φ.U) ∩ φ.inv ⁻¹' ψ.U := by
+    ext q
+    constructor
+    · rintro ⟨p, ⟨p_in_φ, p_in_ψ⟩, rfl⟩
+      exact ⟨⟨p, p_in_φ, rfl⟩, by
+        simpa only [Set.mem_preimage, φ.inv_apply p p_in_φ] using p_in_ψ⟩
+    · rintro ⟨⟨p, p_in_φ, rfl⟩, inverse_in_ψ⟩
+      exact ⟨p, ⟨p_in_φ, by
+        simpa only [Set.mem_preimage, φ.inv_apply p p_in_φ] using inverse_in_ψ⟩, rfl⟩
+  rw [overlap_eq]
+  exact φ.continuous_inverse.isOpen_inter_preimage φ.open_image ψ.open_U
+
+/-- Charts compatible with a covering atlas have a smooth transition between them. -/
+private theorem contDiffOn_transition_of_atlas {A₀ : Set (Chart n M)}
+    (covers : IsAtlas A₀) (φ ψ : Chart n M)
+    (φ_compatible : ∀ η ∈ A₀, φ.SmoothlyCompatible η)
+    (ψ_compatible : ∀ η ∈ A₀, ψ.SmoothlyCompatible η) :
+    ContDiffOn ℝ ∞ (φ.transition ψ) (φ.overlap ψ) := by
+  apply contDiffOn_of_locally_contDiffOn
+  rintro q ⟨p, p_in_domains, rfl⟩
+  obtain ⟨η, η_in_atlas, p_in_η⟩ := covers p
+  refine ⟨φ.overlap η, isOpen_overlap φ η, ⟨p, ⟨p_in_domains.1, p_in_η⟩, rfl⟩, ?_⟩
+  have φ_to_η := (φ_compatible η η_in_atlas).1
+  have η_to_ψ := (ψ_compatible η η_in_atlas).2
+  have transition_maps_to : Set.MapsTo (φ.transition η)
+      (φ.overlap ψ ∩ φ.overlap η) (η.overlap ψ) := by
+    intro q q_in_overlaps
+    have point_in_φ_ψ := inverse_mem_overlap φ ψ q_in_overlaps.1
+    have point_in_φ_η := inverse_mem_overlap φ η q_in_overlaps.2
+    exact ⟨φ.inv q, ⟨point_in_φ_η.2, point_in_φ_ψ.2⟩, rfl⟩
+  have composition_smooth :=
+    η_to_ψ.comp (φ_to_η.mono Set.inter_subset_right) transition_maps_to
+  apply composition_smooth.congr
+  intro q q_in_overlaps
+  change ψ (φ.inv q) = ψ (η.inv (η (φ.inv q)))
+  rw [η.inv_apply _ (inverse_mem_overlap φ η q_in_overlaps.2).2]
+
+/-- **Every smooth atlas generates a maximal smooth atlas** (Lee, Smooth Manifolds,
+Proposition 1.17 (a)). -/
+theorem isMaximalSmoothAtlas_smoothStructure {A₀ : Set (Chart n M)} (smooth : IsSmoothAtlas A₀) :
+    IsMaximalSmoothAtlas (smoothStructure A₀) := by
+  have atlas_subset : A₀ ⊆ smoothStructure A₀ :=
+    fun φ φ_in_atlas ψ ψ_in_atlas => smooth.compatible φ φ_in_atlas ψ ψ_in_atlas
+  refine { covers := ?_, compatible := ?_, maximal := ?_ }
+  · intro p
+    obtain ⟨φ, φ_in_atlas, p_in_φ⟩ := smooth.covers p
+    exact ⟨φ, atlas_subset φ_in_atlas, p_in_φ⟩
+  · intro φ φ_in_structure ψ ψ_in_structure
+    exact ⟨contDiffOn_transition_of_atlas smooth.covers φ ψ φ_in_structure ψ_in_structure,
+      contDiffOn_transition_of_atlas smooth.covers ψ φ ψ_in_structure φ_in_structure⟩
+  · intro φ φ_compatible ψ ψ_in_atlas
+    exact φ_compatible ψ (atlas_subset ψ_in_atlas)
+
+/-- **A smooth manifold from an atlas** (Lee, Smooth Manifolds, Proposition 1.17). Equip the
+topological manifold with the maximal extension of the given smooth atlas. -/
 def SmoothManifold.ofAtlas (manifold : IsTopologicalManifold n M) {A₀ : Set (Chart n M)}
     (smooth : IsSmoothAtlas A₀) : SmoothManifold n M where
-  topologicalManifold := manifold
-  A := smoothStructure A₀
-  maximal := isMaximalSmoothAtlas_smoothStructure smooth
+  topological := manifold
+  A := DifferentialGeometry.smoothStructure A₀
+  smoothStructure := isMaximalSmoothAtlas_smoothStructure smooth
 
-/-- **The charts of a smooth atlas are smooth charts of the manifold it determines** (Lee, Smooth
-Manifolds, Proposition 1.17 (a)). A chart of `A₀` is smoothly compatible with every chart of `A₀`,
-because `A₀` is a smooth atlas, and that is what membership in the smooth structure asks. -/
+/-- **An atlas lies in its generated smooth structure** (Lee, Smooth Manifolds,
+Proposition 1.17 (a)). -/
 theorem SmoothManifold.subset_ofAtlas (manifold : IsTopologicalManifold n M)
     {A₀ : Set (Chart n M)} (smooth : IsSmoothAtlas A₀) :
     A₀ ⊆ (SmoothManifold.ofAtlas manifold smooth).A :=
   fun φ φ_in_A₀ ψ ψ_in_A₀ => smooth.compatible φ φ_in_A₀ ψ ψ_in_A₀
 
-/-- **A smooth structure is determined by itself** (Lee, Smooth Manifolds, p. 13). The charts
-smoothly compatible with every chart of `A` are exactly the charts of `A`. Maximality puts every
-such chart in `A`, and `A` is a smooth atlas, so each of its charts is compatible with all of
-them. -/
+/-- **A smooth structure is determined by itself** (Lee, Smooth Manifolds, p. 13). The maximal
+extension of a maximal smooth atlas is itself. -/
 theorem SmoothManifold.smoothStructure_A (manifold : SmoothManifold n M) :
-    smoothStructure manifold.A = manifold.A := by
+    DifferentialGeometry.smoothStructure manifold.A = manifold.A := by
   ext φ
-  rw [smoothStructure, Set.mem_ofPred_eq]
+  rw [DifferentialGeometry.smoothStructure, Set.mem_ofPred_eq]
   constructor
   · intro compatible
-    exact manifold.maximal.maximal φ compatible
+    exact manifold.smoothStructure.maximal φ compatible
   · intro φ_in_A ψ ψ_in_A
-    exact manifold.maximal.smooth.compatible φ φ_in_A ψ ψ_in_A
+    exact manifold.smoothStructure.compatible φ φ_in_A ψ ψ_in_A
 
 end DifferentialGeometry

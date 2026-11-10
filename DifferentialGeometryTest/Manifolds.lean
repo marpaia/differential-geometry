@@ -22,8 +22,8 @@ def euclideanChart (n : ℕ) : Chart n (ℝ^n) where
 
 /-- `ℝ^n` is a topological `n`-manifold. -/
 example (n : ℕ) : IsTopologicalManifold n (ℝ^n) where
-  hausdorff := inferInstance
   secondCountable := inferInstance
+  hausdorff := inferInstance
   locallyEuclidean p := ⟨euclideanChart n, Set.mem_univ p⟩
 
 /-- `ℝ^2` is `ℝ²`. -/

@@ -9,16 +9,15 @@ This is a library for learning differential geometry with Lean. The definitions 
 Lee defines a topological `n`-manifold as a second countable Hausdorff space that is locally Euclidean of dimension `n`. In the library it looks like this.
 
 ```lean
-/-- **Topological manifolds** (Lee, Topological Manifolds, p. 39). A second countable Hausdorff
-space that is locally Euclidean of dimension `n`. The topology is the instance
-`TopologicalSpace M`. -/
+/-- **Topological manifolds** (Lee, Topological Manifolds, p. 39). A topological space that is
+second countable, Hausdorff, and locally Euclidean of dimension `n`. -/
 structure IsTopologicalManifold (n : ℕ) (M : Type*) [TopologicalSpace M] : Prop where
-  /-- every point lies in a coordinate domain -/
-  locallyEuclidean : IsLocallyEuclidean n M
-  /-- distinct points have disjoint open neighborhoods -/
-  hausdorff : T2Space M
   /-- there is a countable basis of open sets -/
   secondCountable : SecondCountableTopology M
+  /-- distinct points have disjoint open neighborhoods -/
+  hausdorff : T2Space M
+  /-- every point lies in a coordinate domain -/
+  locallyEuclidean : IsLocallyEuclidean n M
 ```
 
 A topological manifold has coordinates but no calculus. A chart `φ` lets you read a function on `M` as a function on `ℝⁿ` and differentiate it there, but two charts can disagree about whether the result is smooth. So Lee asks for charts that agree. Two charts `φ` and `ψ` are smoothly compatible when the transition map `ψ ∘ φ⁻¹` between their coordinates is smooth. An atlas is smooth when any two of its charts are compatible, and a smooth atlas is maximal when it already contains every chart compatible with it. Lee calls a maximal smooth atlas a smooth structure, and a smooth manifold is a topological manifold together with one.
@@ -26,15 +25,15 @@ A topological manifold has coordinates but no calculus. A chart `φ` lets you re
 That is the definition, with the topological manifold as its first field:
 
 ```lean
-/-- **Smooth manifolds** (Lee, Smooth Manifolds, p. 13). A pair `(M, A)` of a topological manifold
-and a smooth structure, a maximal smooth atlas. The charts of `A` are the smooth charts. -/
+/-- **Smooth manifolds** (Lee, Smooth Manifolds, p. 13). A topological `n`-manifold equipped with
+a maximal atlas whose transition maps are smooth. -/
 structure SmoothManifold (n : ℕ) (M : Type*) [TopologicalSpace M] where
   /-- `M` is a topological `n`-manifold -/
-  topologicalManifold : IsTopologicalManifold n M
+  topological : IsTopologicalManifold n M
   /-- `A`, the smooth structure -/
   A : Set (Chart n M)
   /-- `A` is a maximal smooth atlas -/
-  maximal : IsMaximalSmoothAtlas A
+  smoothStructure : IsMaximalSmoothAtlas A
 ```
 
 A regular surface builds on `SmoothManifold` the same way.
@@ -42,22 +41,20 @@ A regular surface builds on `SmoothManifold` the same way.
 To see how this definition gets used, here is a small theorem about it. `smoothStructure A` is the set of all charts that are smoothly compatible with every chart of `A`. Lee uses this in Proposition 1.17 to build a smooth structure out of a handful of charts. If `A` is already a smooth structure, you get `A` back.
 
 ```lean
-/-- **A smooth structure is determined by itself** (Lee, Smooth Manifolds, p. 13). The charts
-smoothly compatible with every chart of `A` are exactly the charts of `A`. Maximality puts every
-such chart in `A`, and `A` is a smooth atlas, so each of its charts is compatible with all of
-them. -/
+/-- **A smooth structure is determined by itself** (Lee, Smooth Manifolds, p. 13). The maximal
+extension of a maximal smooth atlas is itself. -/
 theorem SmoothManifold.smoothStructure_A (manifold : SmoothManifold n M) :
-    smoothStructure manifold.A = manifold.A := by
+    DifferentialGeometry.smoothStructure manifold.A = manifold.A := by
   ext φ
-  rw [smoothStructure, Set.mem_ofPred_eq]
+  rw [DifferentialGeometry.smoothStructure, Set.mem_ofPred_eq]
   constructor
   · intro compatible
-    exact manifold.maximal.maximal φ compatible
+    exact manifold.smoothStructure.maximal φ compatible
   · intro φ_in_A ψ ψ_in_A
-    exact manifold.maximal.smooth.compatible φ φ_in_A ψ ψ_in_A
+    exact manifold.smoothStructure.compatible φ φ_in_A ψ ψ_in_A
 ```
 
-Two sets are equal when they have the same members, so `ext φ` picks a chart and asks for both inclusions. The `rw` unfolds what it means for `φ` to be in `smoothStructure A`: it is compatible with every chart of `A`. Then `constructor` splits the two directions. If `φ` is compatible with all of `A`, it is in `A`, which is the `maximal` field. If `φ` is in `A`, it is compatible with every chart of `A`, which is the `compatible` field of the smooth atlas. Hypotheses are named for what they say, `φ_in_A` for `φ ∈ A`, so each line reads as plain English.
+Two sets are equal when they have the same members, so `ext φ` picks a chart and asks for both inclusions. The `rw` unfolds what it means for `φ` to be in `smoothStructure A`: it is compatible with every chart of `A`. Then `constructor` splits the two directions. If `φ` is compatible with all of `A`, it is in `A`, which is `manifold.smoothStructure.maximal`. If `φ` is in `A`, it is compatible with every chart of `A`, which is `manifold.smoothStructure.compatible`. Hypotheses are named for what they say, `φ_in_A` for `φ ∈ A`, so each line reads as plain English.
 
 ## Contents
 
@@ -80,7 +77,7 @@ Citations give the book, then the section or page and the definition or proposit
 
 ## Notation
 
-Everything is in the namespace `DifferentialGeometry`, and the notation is scoped to it.
+Everything is in the namespace `DifferentialGeometry`, and the notation is scoped to it. General notation is defined in [`Notation.lean`](DifferentialGeometry/Notation.lean); chart inverse notation and its printer are defined in [`Manifolds/Notation.lean`](DifferentialGeometry/Manifolds/Notation.lean).
 
 | On paper | In Lean |
 | --- | --- |
